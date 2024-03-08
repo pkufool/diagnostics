@@ -4,65 +4,73 @@ import json
 import queue
 import math
 
-patterns = [
-    "module=(?P<module>\S+), dim=(?P<dim>\d+), size=(?P<size>\S+), eigs percentiles: (?P<eigs>.*), norm=(?P<norm>\S+), mean=(?P<mean>\S+), rms=(?P<rms>\S+)",
-    "module=(?P<module>\S+), dim=(?P<dim>\d+), size=(?P<size>\S+), value percentiles: (?P<value>.*), norm=(?P<norm>\S+), mean=(?P<mean>\S+), rms=(?P<rms>\S+)",
-    "module=(?P<module>\S+), dim=(?P<dim>\d+), size=(?P<size>\S+), positive percentiles: (?P<positive>.*), norm=(?P<norm>\S+), mean=(?P<mean>\S+), rms=(?P<rms>\S+)",
-    "module=(?P<module>\S+), dim=(?P<dim>\d+), size=(?P<size>\S+), rms percentiles: (?P<rmsp>.*), norm=(?P<norm>\S+), mean=(?P<mean>\S+), rms=(?P<rms>\S+)",
-    "module=(?P<module>\S+), dim=(?P<dim>\d+), size=(?P<size>\S+), stddev percentiles: (?P<stddev>.*), norm=(?P<norm>\S+), mean=(?P<mean>\S+), rms=(?P<rms>\S+)",
-    "module=(?P<module>\S+), dim=(?P<dim>\d+), size=(?P<size>\S+), abs percentiles: (?P<abs>.*), norm=(?P<norm>\S+), mean=(?P<mean>\S+), rms=(?P<rms>\S+)",
-    "module=(?P<module>\S+), dim=(?P<dim>\d+), size=(?P<size>\S+), min percentiles: (?P<min>.*), norm=(?P<norm>\S+), mean=(?P<mean>\S+), rms=(?P<rms>\S+)",
-    "module=(?P<module>\S+), dim=(?P<dim>\d+), size=(?P<size>\S+), max percentiles: (?P<max>.*), norm=(?P<norm>\S+), mean=(?P<mean>\S+), rms=(?P<rms>\S+)",
-    "module=(?P<module>\S+), type=(?P<type>\S+), dim=(?P<dim>\d+), size=(?P<size>\S+), value percentiles: (?P<value>.*), norm=(?P<norm>\S+), mean=(?P<mean>\S+), rms=(?P<rms>\S+)",
-    "module=(?P<module>\S+), type=(?P<type>\S+), dim=(?P<dim>\d+), size=(?P<size>\S+), abs percentiles: (?P<abs>.*), norm=(?P<norm>\S+), mean=(?P<mean>\S+), rms=(?P<rms>\S+)",
-    "module=(?P<module>\S+), type=(?P<type>\S+), dim=(?P<dim>\d+), size=(?P<size>\S+), min percentiles: (?P<min>.*), norm=(?P<norm>\S+), mean=(?P<mean>\S+), rms=(?P<rms>\S+)",
-    "module=(?P<module>\S+), type=(?P<type>\S+), dim=(?P<dim>\d+), size=(?P<size>\S+), max percentiles: (?P<max>.*), norm=(?P<norm>\S+), mean=(?P<mean>\S+), rms=(?P<rms>\S+)",
-    "module=(?P<module>\S+), dim=(?P<dim>\d+), size=(?P<size>\S+), eigs percentiles: (?P<eigs>.*), mean=(?P<mean>\S+), rms=(?P<rms>\S+)",
-    "module=(?P<module>\S+), dim=(?P<dim>\d+), size=(?P<size>\S+), value percentiles: (?P<value>.*), mean=(?P<mean>\S+), rms=(?P<rms>\S+)",
-    "module=(?P<module>\S+), dim=(?P<dim>\d+), size=(?P<size>\S+), positive percentiles: (?P<positive>.*), mean=(?P<mean>\S+), rms=(?P<rms>\S+)",
-    "module=(?P<module>\S+), dim=(?P<dim>\d+), size=(?P<size>\S+), rms percentiles: (?P<rmsp>.*), mean=(?P<mean>\S+), rms=(?P<rms>\S+)",
-    "module=(?P<module>\S+), dim=(?P<dim>\d+), size=(?P<size>\S+), stddev percentiles: (?P<stddev>.*), mean=(?P<mean>\S+), rms=(?P<rms>\S+)",
-    "module=(?P<module>\S+), dim=(?P<dim>\d+), size=(?P<size>\S+), abs percentiles: (?P<abs>.*), mean=(?P<mean>\S+), rms=(?P<rms>\S+)",
-    "module=(?P<module>\S+), dim=(?P<dim>\d+), size=(?P<size>\S+), min percentiles: (?P<min>.*), mean=(?P<mean>\S+), rms=(?P<rms>\S+)",
-    "module=(?P<module>\S+), dim=(?P<dim>\d+), size=(?P<size>\S+), max percentiles: (?P<max>.*), mean=(?P<mean>\S+), rms=(?P<rms>\S+)",
-    "module=(?P<module>\S+), type=(?P<type>\S+), dim=(?P<dim>\d+), size=(?P<size>\S+), value percentiles: (?P<value>.*), mean=(?P<mean>\S+), rms=(?P<rms>\S+)",
-    "module=(?P<module>\S+), type=(?P<type>\S+), dim=(?P<dim>\d+), size=(?P<size>\S+), abs percentiles: (?P<abs>.*), mean=(?P<mean>\S+), rms=(?P<rms>\S+)",
-    "module=(?P<module>\S+), type=(?P<type>\S+), dim=(?P<dim>\d+), size=(?P<size>\S+), min percentiles: (?P<min>.*), mean=(?P<mean>\S+), rms=(?P<rms>\S+)",
-    "module=(?P<module>\S+), type=(?P<type>\S+), dim=(?P<dim>\d+), size=(?P<size>\S+), max percentiles: (?P<max>.*), mean=(?P<mean>\S+), rms=(?P<rms>\S+)",
-]
 
-patterns = [re.compile(p) for p in patterns]
+def get_patterns():
+    patterns = [
+        "module=(?P<module>\S+), dim=(?P<dim>\d+), size=(?P<size>\S+), eigs percentiles: (?P<eigs>.*), norm=(?P<norm>\S+), mean=(?P<mean>\S+), rms=(?P<rms>\S+)",
+        "module=(?P<module>\S+), dim=(?P<dim>\d+), size=(?P<size>\S+), value percentiles: (?P<value>.*), norm=(?P<norm>\S+), mean=(?P<mean>\S+), rms=(?P<rms>\S+)",
+        "module=(?P<module>\S+), dim=(?P<dim>\d+), size=(?P<size>\S+), positive percentiles: (?P<positive>.*), norm=(?P<norm>\S+), mean=(?P<mean>\S+), rms=(?P<rms>\S+)",
+        "module=(?P<module>\S+), dim=(?P<dim>\d+), size=(?P<size>\S+), rms percentiles: (?P<rmsp>.*), norm=(?P<norm>\S+), mean=(?P<mean>\S+), rms=(?P<rms>\S+)",
+        "module=(?P<module>\S+), dim=(?P<dim>\d+), size=(?P<size>\S+), stddev percentiles: (?P<stddev>.*), norm=(?P<norm>\S+), mean=(?P<mean>\S+), rms=(?P<rms>\S+)",
+        "module=(?P<module>\S+), dim=(?P<dim>\d+), size=(?P<size>\S+), abs percentiles: (?P<abs>.*), norm=(?P<norm>\S+), mean=(?P<mean>\S+), rms=(?P<rms>\S+)",
+        "module=(?P<module>\S+), dim=(?P<dim>\d+), size=(?P<size>\S+), min percentiles: (?P<min>.*), norm=(?P<norm>\S+), mean=(?P<mean>\S+), rms=(?P<rms>\S+)",
+        "module=(?P<module>\S+), dim=(?P<dim>\d+), size=(?P<size>\S+), max percentiles: (?P<max>.*), norm=(?P<norm>\S+), mean=(?P<mean>\S+), rms=(?P<rms>\S+)",
+        "module=(?P<module>\S+), type=(?P<type>\S+), dim=(?P<dim>\d+), size=(?P<size>\S+), value percentiles: (?P<value>.*), norm=(?P<norm>\S+), mean=(?P<mean>\S+), rms=(?P<rms>\S+)",
+        "module=(?P<module>\S+), type=(?P<type>\S+), dim=(?P<dim>\d+), size=(?P<size>\S+), abs percentiles: (?P<abs>.*), norm=(?P<norm>\S+), mean=(?P<mean>\S+), rms=(?P<rms>\S+)",
+        "module=(?P<module>\S+), type=(?P<type>\S+), dim=(?P<dim>\d+), size=(?P<size>\S+), min percentiles: (?P<min>.*), norm=(?P<norm>\S+), mean=(?P<mean>\S+), rms=(?P<rms>\S+)",
+        "module=(?P<module>\S+), type=(?P<type>\S+), dim=(?P<dim>\d+), size=(?P<size>\S+), max percentiles: (?P<max>.*), norm=(?P<norm>\S+), mean=(?P<mean>\S+), rms=(?P<rms>\S+)",
+        "module=(?P<module>\S+), dim=(?P<dim>\d+), size=(?P<size>\S+), eigs percentiles: (?P<eigs>.*), mean=(?P<mean>\S+), rms=(?P<rms>\S+)",
+        "module=(?P<module>\S+), dim=(?P<dim>\d+), size=(?P<size>\S+), value percentiles: (?P<value>.*), mean=(?P<mean>\S+), rms=(?P<rms>\S+)",
+        "module=(?P<module>\S+), dim=(?P<dim>\d+), size=(?P<size>\S+), positive percentiles: (?P<positive>.*), mean=(?P<mean>\S+), rms=(?P<rms>\S+)",
+        "module=(?P<module>\S+), dim=(?P<dim>\d+), size=(?P<size>\S+), rms percentiles: (?P<rmsp>.*), mean=(?P<mean>\S+), rms=(?P<rms>\S+)",
+        "module=(?P<module>\S+), dim=(?P<dim>\d+), size=(?P<size>\S+), stddev percentiles: (?P<stddev>.*), mean=(?P<mean>\S+), rms=(?P<rms>\S+)",
+        "module=(?P<module>\S+), dim=(?P<dim>\d+), size=(?P<size>\S+), abs percentiles: (?P<abs>.*), mean=(?P<mean>\S+), rms=(?P<rms>\S+)",
+        "module=(?P<module>\S+), dim=(?P<dim>\d+), size=(?P<size>\S+), min percentiles: (?P<min>.*), mean=(?P<mean>\S+), rms=(?P<rms>\S+)",
+        "module=(?P<module>\S+), dim=(?P<dim>\d+), size=(?P<size>\S+), max percentiles: (?P<max>.*), mean=(?P<mean>\S+), rms=(?P<rms>\S+)",
+        "module=(?P<module>\S+), type=(?P<type>\S+), dim=(?P<dim>\d+), size=(?P<size>\S+), value percentiles: (?P<value>.*), mean=(?P<mean>\S+), rms=(?P<rms>\S+)",
+        "module=(?P<module>\S+), type=(?P<type>\S+), dim=(?P<dim>\d+), size=(?P<size>\S+), abs percentiles: (?P<abs>.*), mean=(?P<mean>\S+), rms=(?P<rms>\S+)",
+        "module=(?P<module>\S+), type=(?P<type>\S+), dim=(?P<dim>\d+), size=(?P<size>\S+), min percentiles: (?P<min>.*), mean=(?P<mean>\S+), rms=(?P<rms>\S+)",
+        "module=(?P<module>\S+), type=(?P<type>\S+), dim=(?P<dim>\d+), size=(?P<size>\S+), max percentiles: (?P<max>.*), mean=(?P<mean>\S+), rms=(?P<rms>\S+)",
+    ]
+
+    patterns = [re.compile(p) for p in patterns]
+    return patterns
+
 
 # extract diagnostics info
-matched_lines = []
-with open(sys.argv[1], "r") as f:
-    for line in f:
-        match = None
-        for p in patterns:
-            match = p.match(line.strip())
-            if match is not None:
-                matched_lines.append(match.groupdict())
-                break
+def extract_diag_info(fname, patterns):
+    matched_lines = []
+    with open(fname, "r") as f:
+        for line in f:
+            match = None
+            for p in patterns:
+                match = p.match(line.strip())
+                if match is not None:
+                    matched_lines.append(match.groupdict())
+                    break
+    return matched_lines
+
 
 # built structure
-tree = {}
-for line in matched_lines:
-    module = line["module"]
-    print(module)
-    parts = module.split(".")
-    node = tree
-    for i, p in enumerate(parts):
-        if i < len(parts) - 1:
-            if p in node:
-                node = node[p]
+def build_structure(diag_lines):
+    tree = {}
+    for line in diag_lines:
+        module = line["module"]
+        parts = module.split(".")
+        node = tree
+        for i, p in enumerate(parts):
+            if i < len(parts) - 1:
+                if p in node:
+                    node = node[p]
+                else:
+                    node[p] = {}
+                    node = node[p]
             else:
-                node[p] = {}
-                node = node[p]
-        else:
-            if p not in node:
-                node[p] = [line]
-            else:
-                node[p].append(line)
+                if p not in node:
+                    node[p] = [line]
+                else:
+                    node[p].append(line)
+    return tree
 
 
 def get_width(node):
@@ -70,7 +78,7 @@ def get_width(node):
         return 1
     current = 0
     if "output" in node.keys():
-        current = get_width(node["output"]) * 2
+        current = get_width(node["output"])
     child = 0
     for key in node.keys():
         if key in ("output", "grad", "output[0]"):
@@ -80,13 +88,60 @@ def get_width(node):
     return node["length"]
 
 
+def inject_ref(tree, diag_lines):
+    for line in diag_lines:
+        module = line["module"]
+        parts = module.split(".")
+        node = tree
+        for i, p in enumerate(parts):
+            if i < len(parts) - 1:
+                if p in node:
+                    node = node[p]
+                else:
+                    break
+            else:
+                if p in node:
+                    assert isinstance(node[p], list), node[p]
+                    key = ""
+                    for item in (
+                        "abs",
+                        "min",
+                        "max",
+                        "value",
+                        "rmsp",
+                        "stddev",
+                        "eigs",
+                        "positive",
+                    ):
+                        if item in line:
+                            key = item
+                            break
+                    assert key != "", key
+                    for item in node[p]:
+                        if (
+                            key in item
+                            and item["module"] == module
+                            and item["dim"] == line["dim"]
+                        ):
+                            for m in ("rms", "mean", "norm", key, "size"):
+                                if m in item and m in line:
+                                    item[f"{m}_ref"] = line[m]
+
+
+tree = build_structure(extract_diag_info(sys.argv[1], get_patterns()))
+
 get_width(tree)
+
+has_ref = False
+if len(sys.argv) == 4:
+    inject_ref(tree, extract_diag_info(sys.argv[3], get_patterns()))
+    has_ref = True
 
 print(json.dumps(tree, indent=2))
 
 svg_width = 1900
 svg_height = 675
-svg_title = "Diagnostics"
+svg_title = "Differential Diagnostics" if has_ref else "Diagnostics"
 font_family = "Verdana"
 
 # write svg
@@ -201,14 +256,19 @@ svg_head += """
     }
 
     function update_histogram_single(name, values) {
+      var id_attr = "_his_";
+      if (name.slice(-4) == "_ref") {
+        name = name.slice(0, -4);
+        id_attr = "_his_ref_";
+      }
       var g_node = document.getElementById("his_"+name);
-      var child_nodes = find_children(g_node, "rect", "_his_");
+      var child_nodes = find_children(g_node, "rect", id_attr);
       for (var i = 0; i < child_nodes.length; ++i) {
         var child_node = child_nodes[i];
         var y = parseInt(child_node.attributes["y"].value);
         var height = parseInt(child_node.attributes["height"].value);
         y = y + height;
-        var index = parseInt(child_node.attributes["_his_"].value);
+        var index = parseInt(child_node.attributes[id_attr].value);
         if (values.length == 0) {
             child_node.attributes["y"].value = y.toString();
             child_node.attributes["height"].value = "0";
@@ -218,6 +278,7 @@ svg_head += """
         var min = parseFloat(values[0]);
         var max = parseFloat(values[10]);
         height = Math.round((value - min) / (max - min) * 100);
+        height = height == 0 ? 1 : height;
         child_node.attributes["y"].value = (y - height).toString();
         child_node.attributes["height"].value = height.toString();
       }
@@ -230,6 +291,13 @@ svg_head += """
         for (var i = 0; i < types.length; ++i) {
           for (var j = 0; j < metrics.length; ++j) {
             var attr_name = types[i]+"_"+metrics[j];
+            var values = [];
+            if (attr[attr_name] != undefined) {
+              values = attr[attr_name].value.split(" ");
+            }
+            update_histogram_single(attr_name, values);
+
+            var attr_name = types[i]+"_"+metrics[j]+"_ref";
             var values = [];
             if (attr[attr_name] != undefined) {
               values = attr[attr_name].value.split(" ");
@@ -504,11 +572,24 @@ svg_head += """
       for(i=0;i<el.length;i++) {
         var rect_node = find_child(el[i], "rect");
         var attr_name = color[0] + "_" + color[2];
+        var has_ref = true;
+        if (rect_node.attributes["_has_ref"] == undefined) {
+            has_ref = false;
+        }
         if (rect_node.attributes[attr_name] == undefined) {
-          rect_node.style["fill"] = "rgb(255, 240, 0)";
+          if (has_ref) {
+              rect_node.style["fill"] = "rgb(255, 255, 255)";
+          } else {
+              rect_node.style["fill"] = "rgb(255, 240, 0)";
+          }
           continue;
         }
         var value = rect_node.attributes[attr_name].value.split(" ");
+        var ref_value = undefined;
+        if (has_ref) {
+          ref_value = rect_node.attributes[attr_name+"_ref"].value.split(" ");
+        }
+        console.log(has_ref, value, ref_value);
         var metric = "";
         if (color[1] == "mean") {
           metric = parseFloat(value[11]);
@@ -519,13 +600,41 @@ svg_head += """
             metric = parseFloat(value[14]);
           }
         }
+        var ref_metric = "";
+        if (has_ref) {
+          if (color[1] == "mean") {
+            ref_metric = parseFloat(ref_value[11]);
+          } else if (color[1] == "rms") {
+            ref_metric = parseFloat(ref_value[12]);
+          } else {
+            if (ref_value.length == 15) {
+              ref_metric = parseFloat(ref_value[14]);
+            }
+          }
+        }
+        console.log(has_ref, metric, ref_metric);
         if (metric == "") {
-          rect_node.style["fill"] = "rgb(255, 240, 0)";
+          if (has_ref) {
+              rect_node.style["fill"] = "rgb(255, 255, 255)";
+          } else {
+              rect_node.style["fill"] = "rgb(255, 240, 0)";
+          }
         } else {
-          var color_g = Math.round((1 - metric) * 255);
-          color_g = color_g < 0 ? 0 : color_g;
-          color_g = color_g > 225 ? 225 : color_g;
-          rect_node.style["fill"] = "rgb(255," + color_g + ",0)";
+          if (has_ref) {
+             var diff = metric - ref_metric;
+             if (diff > 0) {
+               rect_node.style["fill"] = "rgb(255,0,0)";
+             } else if (diff < 0) {
+               rect_node.style["fill"] = "rgb(0,0,255)";
+             } else {
+               rect_node.style["fill"] = "rgb(255,255,255)";
+             }
+          } else {
+              var color_g = Math.round((1 - metric) * 255);
+              color_g = color_g < 0 ? 0 : color_g;
+              color_g = color_g > 225 ? 225 : color_g;
+              rect_node.style["fill"] = "rgb(255," + color_g + ",0)";
+          }
         }
       }
     }
@@ -576,9 +685,15 @@ for i, m in enumerate(metrics):
     <rect x="{x}" y="{y}" width="165" height="100" rx="0" ry="0" fill="transparent" style="stroke:black;stroke-width:0.1" />
     """
     for j in range(11):
-        xx = x + 5 + j * 14 + 4
-        yy = y + 100
-        svg_head += f"""<rect _his_="{j}" x="{xx}" y="{yy}" width="6" height="0" rx="0" ry="0" fill="lightblue" />"""
+        if has_ref:
+            xx = x + 5 + j * 14 + 2
+            yy = y + 100
+            svg_head += f"""<rect _his_="{j}" x="{xx}" y="{yy}" width="2" height="0" rx="0" ry="0" fill="lightblue" />"""
+            svg_head += f"""<rect _his_ref_="{j}" x="{xx+6}" y="{yy}" width="2" height="0" rx="0" ry="0" fill="red" />"""
+        else:
+            xx = x + 5 + j * 14 + 4
+            yy = y + 100
+            svg_head += f"""<rect _his_="{j}" x="{xx}" y="{yy}" width="6" height="0" rx="0" ry="0" fill="lightblue" />"""
 
     svg_head += f"""
     <text text-anchor="middle" x="{x + 75}" y="{y + 120}" font-size="12" font-family="{font_family}" fill="rgb(0,0,0)">{m}</text>
@@ -590,9 +705,15 @@ for i, m in enumerate(metrics):
     <rect x="{x}" y="{y}" width="165" height="100" rx="0" ry="0" fill="transparent" style="stroke:black;stroke-width:0.1" />
     """
     for j in range(11):
-        xx = x + 5 + j * 14 + 4
-        yy = y + 100
-        svg_head += f"""<rect _his_="{j}" x="{xx}" y="{yy}" width="6" height="0" rx="0" ry="0" fill="lightblue" />"""
+        if has_ref:
+            xx = x + 5 + j * 14 + 2
+            yy = y + 100
+            svg_head += f"""<rect _his_="{j}" x="{xx}" y="{yy}" width="2" height="0" rx="0" ry="0" fill="lightblue" />"""
+            svg_head += f"""<rect _his_ref_="{j}" x="{xx+6}" y="{yy}" width="2" height="0" rx="0" ry="0" fill="red" />"""
+        else:
+            xx = x + 5 + j * 14 + 4
+            yy = y + 100
+            svg_head += f"""<rect _his_="{j}" x="{xx}" y="{yy}" width="6" height="0" rx="0" ry="0" fill="lightblue" />"""
     svg_head += f"""
     <text text-anchor="middle" x="{x + 75}" y="{y + 120}" font-size="12" font-family="{font_family}" fill="rgb(0,0,0)">{m}</text>
     </g>
@@ -632,7 +753,9 @@ with open(sys.argv[2], "w") as f:
         ]
 
         # get value and fill color
-        color = 240
+        color_r = 255
+        color_g = 255 if has_ref else 240
+        color_b = 255 if has_ref else 0
         attributes = {"output": {}, "grad": {}}
         module_type = None
         if "output" in keys or "param_value" in keys:
@@ -653,13 +776,29 @@ with open(sys.argv[2], "w") as f:
                         "rmsp",
                         "stddev",
                         "eigs",
+                        "abs_ref",
+                        "max_ref",
+                        "min_ref",
+                        "value_ref",
+                        "positive_ref",
+                        "rmsp_ref",
+                        "stddev_ref",
+                        "eigs_ref",
                     ):
                         if attr in item and item["dim"] == "0":
-                            attr_value = f"{item[attr][1:-1]} {item['mean']} {item['rms']} {item['size']}"
+                            if attr.endswith("ref"):
+                                attr_value = f"{item[attr][1:-1]} {item['mean_ref']} {item['rms_ref']} {item['size_ref']}"
+                            else:
+                                attr_value = f"{item[attr][1:-1]} {item['mean']} {item['rms']} {item['size']}"
                             if "norm" in item:
-                                attr_value += f" {item['norm']}"
+                                if attr.endswith("ref"):
+                                    attr_value += f" {item['norm_ref']}"
+                                else:
+                                    attr_value += f" {item['norm']}"
                             if attr == "rmsp":
                                 attr = "rms"
+                            if attr == "rmsp_ref":
+                                attr = "rms_ref"
                             if k == "param_value":
                                 k = "output"
                             if k == "param_grad":
@@ -672,17 +811,39 @@ with open(sys.argv[2], "w") as f:
                             ):
                                 if "type" in item:
                                     module_type = item["type"]
-                                color = (
-                                    1 - float(item[default_scheme["metric"]])
-                                ) * 255
-                                color = 0 if color < 0 else int(color)
-                                color = 225 if color > 225 else int(color)
+                                if has_ref:
+                                    ref_metric = f"{default_scheme['metric']}_ref"
+                                    metric = default_scheme["metric"]
+                                    if ref_metric in item:
+                                        diff = float(item[metric]) - float(
+                                            item[ref_metric]
+                                        )
+                                        if diff > 0:
+                                            color_g = 0
+                                            color_b = 0
+                                        elif diff == 0:
+                                            color_g = 255
+                                            color_b = 255
+                                        else:
+                                            color_r = 0
+                                            color_g = 0
+                                            color_b = 255
+                                    else:
+                                        color_r, color_g, color_b = (255, 255, 255)
+                                else:
+                                    color_g = (
+                                        1 - float(item[default_scheme["metric"]])
+                                    ) * 255
+                                    color_g = 0 if color_g < 0 else int(color_g)
+                                    color_g = 225 if color_g > 225 else int(color_g)
 
         x, y, width, text = node["x"], node["y"], node["width"], node["text"]
         text = text if module_type is None else text + f" ({module_type})"
         g = f"""
           <g class="module_g" onmouseover="s('{text}')" onmouseout="c()" onclick="zoom(this)">
-          <title>{text}</title><rect x="{x}" y="{y}" width="{width}" height="15.0" fill="rgb(255,{color},0)" rx="2" ry="2" """
+          <title>{text}</title><rect x="{x}" y="{y}" width="{width}" height="15.0" fill="rgb({color_r},{color_g},{color_b})" rx="2" ry="2" """
+        if has_ref:
+            g += f"""_has_ref="true" """
         for t in ("output", "grad"):
             for k in attributes[t]:
                 g += f"""{t}_{k}="{attributes[t][k]}" """
