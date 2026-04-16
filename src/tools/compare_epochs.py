@@ -38,7 +38,7 @@ from tools.common import (
     open_output,
 )
 
-_DIFF_RE = re.compile(r"^For (.+), rms=.+\[diff=(.+)\]$")
+_DIFF_RE = re.compile(r"^For (.+), rms, diff: (\S+) (\S+)$")
 
 
 def _normalize(x):
@@ -111,9 +111,9 @@ def run(args):
             norm = ((v_old**2).sum() / v_old.numel()).sqrt()
             rel_diff = ((_normalize(v_new) - _normalize(v_old)) ** 2).mean().sqrt()
             if v_old.numel() == 1:
-                s = f"For {k}, value={v_old.item():.2g}->{v_new.item():.2g}"
+                s = f"For {k}, value={v_old.item():.4g}->{v_new.item():.4g}"
             else:
-                s = f"For {k}, rms={norm:.2g}[diff={rel_diff:.2g}]"
+                s = f"For {k}, rms, diff: {norm:.4g} {rel_diff:.4g}"
             lines.append(s)
 
     with open_output(args) as out:

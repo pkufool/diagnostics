@@ -109,10 +109,10 @@ def run(args):
                 out.write(
                     f"module={module}, {dim_and_size},"
                     f" norm={eigs_norm},"
-                    f" next-next-largest-ratio={next_next_largest_ratio:.3f},"
-                    f" next-largest-ratio={next_largest_ratio:.3f},"
-                    f" mean_ratio={mean_ratio:.3f},"
-                    f" 2norm/1norm={norm_ratio:.3f},"
-                    f" top_ratio={top_ratio:.3f},"
-                    f" rms_over_mean={rms_over_mean:.3f}\n"
+                    f" next-next-largest-ratio={next_next_largest_ratio:.4g},"
+                    f" next-largest-ratio={next_largest_ratio:.4g},"
+                    f" mean_ratio={mean_ratio:.4g},"
+                    f" 2norm/1norm={norm_ratio:.4g},"
+                    f" top_ratio={top_ratio:.4g},"
+                    f" rms_over_mean={rms_over_mean:.4g}\n"
                 )
