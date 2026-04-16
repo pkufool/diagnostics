@@ -284,7 +284,9 @@ class TensorDiagnostic(object):
                             eigs, _ = torch.symeig(stats)
                         stats = eigs.abs().sqrt()
                     except:  # noqa
-                        logging.warning("Error getting eigenvalues, trying another method.")
+                        logging.warning(
+                            "Error getting eigenvalues, trying another method."
+                        )
                         if hasattr(torch, "linalg") and hasattr(torch.linalg, "eig"):
                             eigs, _ = torch.linalg.eig(stats)
                             eigs = eigs.abs()
@@ -492,7 +494,6 @@ def attach_diagnostics(
         else:
             module.register_backward_hook(backward_hook)
 
-
     for name, parameter in model.named_parameters():
 
         def param_backward_hook(
@@ -516,23 +517,26 @@ class DiagnosticHandle:
     def __init__(self, diagnostic: ModelDiagnostic):
         self._diagnostic = diagnostic
 
-    # print human-readable diagnostics to the specified output file (or stdout if None). 
+    # print human-readable diagnostics to the specified output file (or stdout if None).
     # Returns a dict containing more specific stats, as tensors, that can be used for further analysis if needed.
     def print(self, output_file: Optional[Union[str, Path]] = None):
         return self._diagnostic.print_diagnostics(output_file=output_file)
 
     # save the diagnostics to the specified path, as a torch file.
     # Returns the path that was saved to.
-    def save(self, path: Union[str, Path], output_file: Optional[Union[str, Path]] = None):
+    def save(
+        self, path: Union[str, Path], output_file: Optional[Union[str, Path]] = None
+    ):
         path = Path(path)
         path.parent.mkdir(parents=True, exist_ok=True)
         stats = self._diagnostic.print_diagnostics(output_file=output_file)
         torch.save(stats, path)
         return path
 
-    def should_stop(self, step: int, stop_after_steps: int = 6) -> bool:
-        # step is typically 0-based; stop_after_steps=6 mirrors exiting after step==5.
-        return (step + 1) >= stop_after_steps
+    def should_stop(self, step: int, stop_step: Optional[int] = None) -> bool:
+        if stop_step is None:
+            stop_step = step + 5
+        return (step + 1) >= stop_step
 
 
 def maybe_attach_diagnostics(
@@ -561,7 +565,9 @@ def _test_tensor_diagnostic():
 
     diagnostic.print_diagnostics()
 
-    model = torch.nn.Sequential(torch.nn.Linear(100, 50), torch.nn.ReLU(), torch.nn.Linear(50, 80))
+    model = torch.nn.Sequential(
+        torch.nn.Linear(100, 50), torch.nn.ReLU(), torch.nn.Linear(50, 80)
+    )
 
     diagnostic = attach_diagnostics(model, opts)
     for _ in range(10):
