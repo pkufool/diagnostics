@@ -521,16 +521,21 @@ class DiagnosticHandle:
     # print human-readable diagnostics to the specified output file (or stdout if None).
     # Returns a dict containing more specific stats, as tensors, that can be used for further analysis if needed.
     def print(self, output_file: Optional[Union[str, Path]] = None):
+        logging.info(
+            f"Printing diagnostics to {output_file if output_file is not None else 'stdout'}"
+        )
         stats = self._diagnostic.print_diagnostics(output_file=output_file)
         self._start_step = None
         return stats
-
 
     # save the diagnostics to the specified path, as a torch file.
     # Returns the path that was saved to.
     def save(
         self, path: Union[str, Path], output_file: Optional[Union[str, Path]] = None
     ):
+        logging.info(
+            f"Printing diagnostics to {output_file if output_file is not None else 'stdout'} and saving details to {path}"
+        )
         path = Path(path)
         path.parent.mkdir(parents=True, exist_ok=True)
         stats = self._diagnostic.print_diagnostics(output_file=output_file)
