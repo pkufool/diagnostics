@@ -1,17 +1,19 @@
-# model-diagnostics
+# NN diagnostics
 
-
+A useful tool to dump diagnostics info from checkpoint.
 
 ## Install
 
 ```bash
-pip install model-diagnostics
+pip install nndiagnostics
 ```
 
 ## Quick Start
 
+1. Integrate diagnostics in your training loop
+
 ```python
-from model_diagnostics import maybe_attach_diagnostics
+from diagnostics import maybe_attach_diagnostics
 
 diag = maybe_attach_diagnostics(model)
 
@@ -24,4 +26,10 @@ for step, batch in enumerate(train_loader):
     if diag and diag.should_stop(step, stop_after_steps=6):
         diag.print(f"{args.exp_dir}/diagnostics-step-{step}.txt")
         break
+```
+
+2. Dump diagnostics information (by setting env `DUMP_DIAGNOSTICS`)
+
+```bash
+DUMP_DIAGNOSTICS=1 python train.py
 ```

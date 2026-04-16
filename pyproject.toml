@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "nndiagnostics"
-version = "0.1.0"
+version = "0.1.1"
 description = "Lightweight PyTorch tensor diagnostics hooks for training loops"
 readme = "README.md"
 requires-python = ">=3.8"
@@ -23,7 +23,4 @@ classifiers = [
 [tool.setuptools]
 package-dir = {"" = "src"}
 include-package-data = true
-
-[tool.setuptools.packages.find]
-where = ["src"]
-include = ["diagnostics*"]
+packages = ["diagnostics"]
