@@ -35,7 +35,6 @@ import re
 from tools.common import (
     add_output_arg,
     aggregate_by_prefix_suffix,
-    compare_two_key_value_files,
     open_output,
 )
 
@@ -113,19 +112,29 @@ def register_subparser(subparsers):
     parser.set_defaults(func=run)
 
 
+def _compute_normalized_importance(filepath):
+    """Parse a diagnostics file and return normalized importance per param."""
+    importance = _parse_importance(filepath)
+    total = sum(importance.values())
+    if total == 0:
+        total = 1.0
+    aggregated = aggregate_by_prefix_suffix(importance)
+    return {k: v / total for k, v in aggregated.items()}
+
+
 def run(args):
     if args.file2 is not None:
-        results = compare_two_key_value_files(args.file1, args.file2)
+        data1 = _compute_normalized_importance(args.file1)
+        data2 = _compute_normalized_importance(args.file2)
         with open_output(args) as out:
-            for k, v1, v2, ratio in results:
-                out.write(f"{k} {v1} {v2} {ratio}\n")
+            for k in sorted(data1.keys()):
+                if k in data2:
+                    v1 = data1[k]
+                    v2 = data2[k]
+                    ratio = v2 / v1
+                    out.write(f"{k} {v1} {v2} {ratio}\n")
     else:
-        importance = _parse_importance(args.file1)
-        total = sum(importance.values())
-        if total == 0:
-            total = 1.0
-
-        aggregated = aggregate_by_prefix_suffix(importance)
+        data = _compute_normalized_importance(args.file1)
         with open_output(args) as out:
-            for k in sorted(aggregated.keys()):
-                out.write(f"{k} {aggregated[k] / total:.4g}\n")
+            for k in sorted(data.keys()):
+                out.write(f"{k} {data[k]:.4g}\n")

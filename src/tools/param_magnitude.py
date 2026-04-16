@@ -31,7 +31,6 @@ import re
 
 from tools.common import (
     add_output_arg,
-    compare_two_key_value_files,
     open_output,
 )
 
@@ -63,19 +62,30 @@ def register_subparser(subparsers):
     parser.set_defaults(func=run)
 
 
+def _parse_magnitude(filepath):
+    """Parse a diagnostics file and extract mean abs value per parameter."""
+    data = {}
+    with open(filepath) as f:
+        for line in f:
+            m = _MAGNITUDE_RE.match(line.rstrip())
+            if m:
+                data[m.group("name")] = float(m.group("mean"))
+    return data
+
+
 def run(args):
+    data1 = _parse_magnitude(args.file1)
+
     if args.file2 is not None:
-        results = compare_two_key_value_files(args.file1, args.file2)
+        data2 = _parse_magnitude(args.file2)
         with open_output(args) as out:
-            for k, v1, v2, ratio in results:
-                out.write(f"{k} {v1} {v2} {ratio}\n")
+            for k in sorted(data1.keys()):
+                if k in data2:
+                    v1 = data1[k]
+                    v2 = data2[k]
+                    ratio = v2 / v1
+                    out.write(f"{k} {v1} {v2} {ratio}\n")
     else:
-        data = {}
-        with open(args.file1) as f:
-            for line in f:
-                m = _MAGNITUDE_RE.match(line.rstrip())
-                if m:
-                    data[m.group("name")] = float(m.group("mean"))
         with open_output(args) as out:
-            for name in sorted(data.keys()):
-                out.write(f"{name} {data[name]}\n")
+            for name in sorted(data1.keys()):
+                out.write(f"{name} {data1[name]}\n")
