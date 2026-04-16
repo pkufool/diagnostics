@@ -23,7 +23,7 @@ for step, batch in enumerate(train_loader):
     optimizer.step()
     optimizer.zero_grad()
 
-    if diag and diag.should_stop(step, stop_after_steps=6):
+    if diag and diag.should_stop(step, stop_after_steps=5):
         diag.print(f"{args.exp_dir}/diagnostics-step-{step}.txt")
         break
 ```

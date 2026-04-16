@@ -2,15 +2,14 @@
 
 This directory shows minimal-intrusion integration in any training loop.
 
-## Install package in editable mode
+## Install package
 
 ```bash
-cd ../model-diagnostics-mini
-pip install -e .
+pip install nndiagnostics
 ```
 
 ## Run sample
 
 ```bash
-python train_loop_example.py --print-diagnostics 1 --exp-dir ./exp
+DUMP_DIAGNOSTICS=1 python train.py --exp-dir ./exp
 ```

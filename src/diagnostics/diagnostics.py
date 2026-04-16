@@ -516,11 +516,15 @@ def attach_diagnostics(
 class DiagnosticHandle:
     def __init__(self, diagnostic: ModelDiagnostic):
         self._diagnostic = diagnostic
+        self._start_step = None
 
     # print human-readable diagnostics to the specified output file (or stdout if None).
     # Returns a dict containing more specific stats, as tensors, that can be used for further analysis if needed.
     def print(self, output_file: Optional[Union[str, Path]] = None):
-        return self._diagnostic.print_diagnostics(output_file=output_file)
+        stats = self._diagnostic.print_diagnostics(output_file=output_file)
+        self._start_step = None
+        return stats
+
 
     # save the diagnostics to the specified path, as a torch file.
     # Returns the path that was saved to.
@@ -531,11 +535,13 @@ class DiagnosticHandle:
         path.parent.mkdir(parents=True, exist_ok=True)
         stats = self._diagnostic.print_diagnostics(output_file=output_file)
         torch.save(stats, path)
+        self._start_step = None
         return path
 
-    def should_stop(self, step: int, stop_step: Optional[int] = None) -> bool:
-        if stop_step is None:
-            stop_step = step + 5
+    def should_stop(self, step: int, stop_after_steps: int = 5) -> bool:
+        if self._start_step is None:
+            self._start_step = step
+        stop_step = self._start_step + stop_after_steps
         return (step + 1) >= stop_step
 
 

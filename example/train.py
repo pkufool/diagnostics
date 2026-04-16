@@ -32,7 +32,7 @@ def main():
         optimizer.step()
         optimizer.zero_grad()
 
-        if diag and diag.should_stop(step, stop_step=step + 5):
+        if diag and diag.should_stop(step, stop_after_steps=5):
             out = Path(args.exp_dir) / f"diagnostics-step-{step}.txt"
             diag.print(out)
             print(f"Saved diagnostics to {out}")
