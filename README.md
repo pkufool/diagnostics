@@ -10,6 +10,8 @@ pip install nndiagnostics
 
 ## Quick Start
 
+### Dump diagnostics infomation
+
 1. Integrate diagnostics in your training loop
 
 ```python
@@ -32,6 +34,41 @@ for step, batch in enumerate(train_loader):
 
 ```bash
 DUMP_DIAGNOSTICS=1 python train.py
+```
+
+### Add Inf/NaN Check Hooks
+
+Register forward and backward hooks on every module and parameter to detect
+non-finite values (NaN/Inf) during training. When a non-finite value is
+detected, a warning is logged with the module/parameter name.
+
+1. Register inf check hooks to your model
+
+```python
+from diagnostics import maybe_register_inf_check_hooks
+
+maybe_register_inf_check_hooks(model)
+
+for step, batch in enumerate(train_loader):
+    loss = train_step(batch)
+    loss.backward()
+    optimizer.step()
+    optimizer.zero_grad()
+```
+
+2. Enable by setting the environment variable `INF_CHECK`:
+
+```bash
+INF_CHECK=1 python train.py
+```
+
+If any module output, gradient, or parameter gradient becomes non-finite, you
+will see warnings like:
+
+```
+WARNING: The sum of encoder.layers.3.output is not finite
+WARNING: The sum of encoder.layers.3.grad[0] is not finite
+WARNING: The sum of encoder.layers.3.weight.param_grad is not finite
 ```
 
 ## CLI Tools
