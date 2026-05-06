@@ -31,6 +31,7 @@ import argparse
 import re
 
 import torch
+import pydash
 
 from tools.common import (
     add_output_arg,
@@ -89,6 +90,12 @@ def register_subparser(subparsers):
         action="store_true",
         help="Also print aggregated diffs by module name prefix/suffix.",
     )
+    parser.add_argument(
+        "-p",
+        "--dot-path",
+        default="model",
+        help="""Dot path of the model's state dict in the checkpoint file. e.g., specify --dot-path path.to.model to treat ckpt["path"]["to"]["model"] as state dict.""",
+    )
     add_output_arg(parser)
     parser.set_defaults(func=run)
 
@@ -98,8 +105,8 @@ def run(args):
     b = torch.load(args.checkpoint2, map_location="cpu", weights_only=False)
 
     try:
-        a = a["model"]
-        b = b["model"]
+        a = pydash.get(a, args.dot_path)
+        b = pydash.get(b, args.dot_path)
     except KeyError:
         pass
 
