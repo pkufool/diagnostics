@@ -12,6 +12,7 @@ license = { text = "Apache-2.0" }
 authors = [{ name = "Next-gen Kaldi Team" }]
 dependencies = [
   "torch>=1.13",
+  "pydash",
 ]
 classifiers = [
   "License :: OSI Approved :: Apache Software License",
